@@ -5,6 +5,7 @@ class Node(object):
         self.parent = None
         self.left = None
         self.right = None
+        self.height = None # for use in AVL trees, not for use elsewhere
 
     def children(self):
         children = 0
