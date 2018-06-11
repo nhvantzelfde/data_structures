@@ -19,23 +19,11 @@ class AVL(BST):
     def delete(self, node):
         if not node: return
 
-        #print "delete, node=", node
-        #print "tree before"
-        #print self
-        
         # insert into BST
         suc = super(AVL, self).delete(node)
 
-        #print "successor =", suc
-        #print "tree after"
-        #print self
-        
         # restore AVL property, working up the tree
-        
         self.__fixAVL(suc)
-
-        #print "tree fixed"
-        #print self
 
         self.__checkAVLRep()
 
@@ -127,7 +115,7 @@ class AVL(BST):
             node.height = 1 + max(self.__height(node.left), self.__height(node.right))
 
     def __checkAVLRep(self):
-        if True: # set to True for debugging
+        if False: # set to True for debugging
             self.__checkHeightRep(self.r)
         
     def __checkHeightRep(self, node):
@@ -141,8 +129,6 @@ class AVL(BST):
 
         self.__checkHeightRep(node.left)
         self.__checkHeightRep(node.right)
-
-        
 
 def main():
     for i in range(30):
