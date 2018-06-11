@@ -68,9 +68,15 @@ class SortedArray(object):
     def get(self, i):
         return self.v[i]
 
-    def total(self):
-        return sum(self.v)
+    def __len__(self):
+        return len(self.v)
     
+    def __getitem__(self, k):
+        return self.v[k]
+
+    def __iter__(self):
+        return iter(self.v)
+        
     def __str__(self):
         return str(self.v)
         
@@ -120,9 +126,10 @@ def randomTest(size):
     return True
 
 def compare(s_arr, ar):
+    if len(s_arr) != len(ar): return False
     for i in range(len(ar)):
-        if ar[i] != s_arr.get(i): return False
-    return True    
+        if ar[i] != s_arr[i]: return False
+    return True 
     
 def main():
     init = [1, 5, 2, 80, 42, 232, 10, -1]
@@ -134,14 +141,14 @@ def main():
     print "Target sums: init=", sum(init),"after adds=", sum(init)+sum(adds), "test=", sum(test)
     
     s_arr = SortedArray(init)
-    print "After initial: s_arr =", s_arr, "sum = ", s_arr.total()
+    print "After initial: s_arr =", s_arr, "sum = ", sum(s_arr)
     for a in adds:
         s_arr.insert(a)
-    print "After adds: s_arr =", s_arr, "sum = ", s_arr.total()
+    print "After adds: s_arr =", s_arr, "sum = ", sum(s_arr)
 
     for d in dels:
         s_arr.delete(d)
-    print "After deletes: s_arr =", s_arr, "sum = ", s_arr.total()
+    print "After deletes: s_arr =", s_arr, "sum = ", sum(s_arr)
     
     error = False
     for i in range(len(test)):
