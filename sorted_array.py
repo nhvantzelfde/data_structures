@@ -84,6 +84,8 @@ class SortedArray(object):
 def randomTest(size):
     s_arr = SortedArray()
     ar = []
+
+    # insertions
     for i in range(size):
         n = random.randint(-10000,10000)
         ar.append(n)
@@ -91,11 +93,28 @@ def randomTest(size):
     ar.sort()
     if not compare(s_arr,ar): return False
 
+    # known deletions
     for i in range(size//2):
         index = random.randint(0,len(ar)-1)
         n = ar[i]
         s_arr.delete(n)
         ar.remove(n)
+    if not compare(s_arr,ar): return False
+
+    # random deletions
+    for i in range(size//4):
+        n = random.randint(-10000,10000)
+        if n in ar:
+            ar.remove(n)
+        s_arr.delete(n)
+    if not compare(s_arr,ar): return False
+
+    # more insertions
+    for i in range(size//4):
+        n = random.randint(-10000,10000)
+        ar.append(n)
+        s_arr.insert(n)
+    ar.sort()
     if not compare(s_arr,ar): return False
 
     return True
