@@ -220,10 +220,9 @@ def treeFromArray(arr):
         tree.insert(Node(k))
     return tree
 
-def randomTest(count):
+def randomTest(tree, count):
     passed = True
     arr = []
-    tree = BST()
 
     i = 0
     while i < count:
@@ -289,7 +288,8 @@ def printErrorMessage(tree, arr, str = ""):
     
 def main():
     for i in range(20):
-        passed = randomTest(100)
+        tree = BST()
+        passed = randomTest(tree, 100)
         if passed:
             print "Passed random test", i+1
 
