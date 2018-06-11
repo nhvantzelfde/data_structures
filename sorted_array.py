@@ -65,15 +65,16 @@ class SortedArray(object):
             return i
         else: return None   
     
-    def get(self, i):
-        return self.v[i]
-
     def __len__(self):
         return len(self.v)
     
     def __getitem__(self, k):
         return self.v[k]
 
+    def __setitem__(self, k, v):
+        self.delete(self.v[k])
+        self.insert(v)
+        
     def __iter__(self):
         return iter(self.v)
         
@@ -81,7 +82,7 @@ class SortedArray(object):
         return str(self.v)
         
     def __checkRep(self):
-        if False:
+        if True: # set to True for debugging
             for i, n in enumerate(self.v):
                 if i == 0: continue
                 if n < self.v[i-1]: 
@@ -135,7 +136,7 @@ def main():
     init = [1, 5, 2, 80, 42, 232, 10, -1]
     adds = [2, 20, 423, 65, 4, 98, -1, 5, 10]
     dels = [42, 232, -1, 5, 2000, -10]
-    test = [1, 2, 80, 10, 2, 20, 423, 65, 4, 98, -1, 5, 10]
+    test = [1, 2, 80, 10, 2, 20, 423, 65, 4, 98, 5, 10, 555]
     test.sort()
 
     print "Target sums: init=", sum(init),"after adds=", sum(init)+sum(adds), "test=", sum(test)
@@ -149,11 +150,15 @@ def main():
     for d in dels:
         s_arr.delete(d)
     print "After deletes: s_arr =", s_arr, "sum = ", sum(s_arr)
+
+    s_arr[0] = 555
+
+    print "After setting element i: s_arr =", s_arr, "sum = ", sum(s_arr)
     
     error = False
     for i in range(len(test)):
-        if test[i] != s_arr.get(i):
-            print "Error at index",i," test =", test[i]," s_arr =",s_arr.get(i)
+        if test[i] != s_arr[i]:
+            print "Error at index",i," test =", test[i]," s_arr =",s_arr[i]
 
     for i in range(20):
         if randomTest(1000): print "Test",i+1,"successful"
