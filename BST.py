@@ -18,8 +18,8 @@ class Node(object):
         return "node: key = " + str(self.key) + ", # of children = " + str(self.children())
 
 class BST(object):
-    def __init__(self, root = None):
-        self.r = root
+    def __init__(self):
+        self.r = None
 
     def insert(self, new):
         node = self.r
@@ -46,24 +46,41 @@ class BST(object):
                 # duplicate key, do nothing
                 break
 
-        self.__checkRep(self.r)
+        self.__checkBSTRep()
 
     def delete(self, node):
         if not node: return
 
-        if node.left == None: self.__transplant(node,node.right)
-        elif node.right == None: self.__transplant(node,node.left)
+        if node.left == None:
+            self.__transplant(node,node.right)
+            if node.right:
+                result = node.right
+            else: result = node.parent
+        elif node.right == None:
+            self.__transplant(node,node.left)
+            result = node.left
         else:
             suc = self.__subtreeMinimum(node.right)
+
+            if suc.right: result = suc.right
+            else: result = suc
+            
             if suc.parent != node:
+                if suc.right:
+                    result = suc.right
+                else:
+                    result = suc.parent
+                
                 self.__transplant(suc,suc.right)
                 suc.right = node.right
-                suc.right.parent = suc
+                suc.right.parent = suc 
             self.__transplant(node,suc)
             suc.left = node.left
             suc.left.parent = suc
+            
+        self.__checkBSTRep()
 
-        self.__checkRep(self.r)
+        return result
 
     def search(self, key):
         node = self.r
@@ -113,7 +130,7 @@ class BST(object):
         return self.__subtreeMaximum(self.r)
 
     def height(self):
-        return self.__nodeHeight(self.r)
+        return self.__height(self.r)
 
     def __subtreeMinimum(self, node):
         while node and node.left:
@@ -140,27 +157,31 @@ class BST(object):
         else: p.right = n2
 
         if n2: n2.parent = p
-
-    def __nodeHeight(self, node):
-        if not node: return -1
-        return 1 + max(self.__nodeHeight(node.left),self.__nodeHeight(node.right))
         
-    def __checkRep(self, node):
+
+    def __height(self, node):
+        if not node: return -1
+        return 1 + max(self.__height(node.left),self.__height(node.right))
+
+    def __checkBSTRep(self):
         if False: # set to True for debugging
-            if not node: return
+            self.__checkNodeRep(self.r)
+        
+    def __checkNodeRep(self, node):
+        if not node: return
 
-            if node.left and node.left.parent != node:
-                print "Rep error: parent pointers"
-            if node.right and node.right.parent != node:
-                print "Rep error: parent pointers"
+        if node.left and node.left.parent != node:
+            print "Rep error: parent pointers"
+        if node.right and node.right.parent != node:
+            print "Rep error: parent pointers"
 
-            if node.left and node.left.key >= node.key:
-                print "Rep error: left subtree key"
-            if node.right and node.right.key <= node.key:
-                print "Rep error: right subtree key"
+        if node.left and node.left.key >= node.key:
+            print "Rep error: left subtree key"
+        if node.right and node.right.key <= node.key:
+            print "Rep error: right subtree key"
 
-            self.__checkRep(node.left)
-            self.__checkRep(node.right)
+        self.__checkNodeRep(node.left)
+        self.__checkNodeRep(node.right)
 
     def __strHelper(self, str_arr, node, depth, max_depth, leaf_width = 4):
         if depth >= max_depth:
