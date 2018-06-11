@@ -1,3 +1,4 @@
+import random
 
 class Node(object):
     def __init__(self, k = None):
@@ -5,7 +6,7 @@ class Node(object):
         self.parent = None
         self.left = None
         self.right = None
-        self.height = None # for use in AVL trees, not for use elsewhere
+        self.height = None # for use in AVL trees, not used in BST implementation
 
     def children(self):
         children = 0
@@ -14,7 +15,7 @@ class Node(object):
         return children
         
     def __str__(self):
-        return "Node: key = " + str(self.key) + ", # of children = " + str(self.children())
+        return "node: key = " + str(self.key) + ", # of children = " + str(self.children())
 
 class BST(object):
     def __init__(self, root = None):
@@ -77,6 +78,7 @@ class BST(object):
         return node
             
     def successor(self, node):
+        if not node: return None
         if node.right:
             return self.__subtreeMinimum(node.right)
         else:
@@ -88,6 +90,7 @@ class BST(object):
             return p
 
     def predecessor(self, node):
+        if not node: return None
         if node.left:
             return self.__subtreeMaximum(node.left)
         else:
@@ -99,7 +102,9 @@ class BST(object):
             return p
 
     def inorderWalk(self):
-        return self.__subtreeWalk(self.r)
+        arr = []
+        self.__subtreeWalk(self.r, arr)
+        return arr
 
     def minimum(self):
         return self.__subtreeMinimum(self.r)
@@ -120,9 +125,12 @@ class BST(object):
             node = node.right
         return node
 
-    def __subtreeWalk(self, node):
-        if node == None: return []
-        return self.__subtreeWalk(node.left) + [node.key] + self.__subtreeWalk(node.right)
+    def __subtreeWalk(self, node, arr):
+        if not node: return
+        else:
+            self.__subtreeWalk(node.left, arr)
+            arr.append(node.key)
+            self.__subtreeWalk(node.right, arr)
     
     def __transplant(self, n1, n2):
         p = n1.parent
@@ -134,11 +142,11 @@ class BST(object):
         if n2: n2.parent = p
 
     def __nodeHeight(self, node):
-        if node == None: return -1
+        if not node: return -1
         return 1 + max(self.__nodeHeight(node.left),self.__nodeHeight(node.right))
         
     def __checkRep(self, node):
-        if True:
+        if False: # set to True for debugging
             if not node: return
 
             if node.left and node.left.parent != node:
@@ -154,23 +162,54 @@ class BST(object):
             self.__checkRep(node.left)
             self.__checkRep(node.right)
 
-    def __depthArray(self, node, depth, arr):
-        if len(arr) <= depth:
-            arr.append([])
-        if not node:
-            arr[depth].append(None)
-        else:
-            arr[depth].append(node.key)
-            self.__depthArray(node.left, depth+1, arr)
-            self.__depthArray(node.right, depth+1, arr)
+    def __strHelper(self, str_arr, node, depth, max_depth, leaf_width = 4):
+        if depth >= max_depth:
+            return 0
 
+        if not node:
+            if depth < max_depth - 1:
+                width = self.__strHelper(str_arr, None, depth+1, max_depth, leaf_width)
+                curr_depth = depth + 1
+                while curr_depth < max_depth:
+                    str_arr[curr_depth] += " "
+                    curr_depth += 1
+                width += 1
+                width += self.__strHelper(str_arr, None, depth+1, max_depth, leaf_width)
+            else: width = leaf_width
+            str_arr[depth] += ''.join([" "] * width)
+            return width
+
+        if depth < max_depth - 1:    
+            width = self.__strHelper(str_arr, node.left, depth+1, max_depth, leaf_width)
+            curr_depth = depth + 1
+            while curr_depth < max_depth:
+                str_arr[curr_depth] += " "
+                curr_depth += 1
+            width += 1
+            width += self.__strHelper(str_arr, node.right, depth+1, max_depth, leaf_width)
+        else: width = leaf_width
+
+        curr_str = str(node.key)
+
+        while len(curr_str) <= width - 2:
+            curr_str = " " + curr_str + " "
+        if len(curr_str) < width:
+            curr_str += " "
+
+        str_arr[depth] += curr_str
+        return width
         
     def __str__(self):
-        arr = []
-        self.__depthArray(self.r, 0, arr)
-        return str(arr)
-
-    
+        str_arr = [""] * (self.height() + 1)
+        self.__strHelper(str_arr, self.r, 0, len(str_arr))
+        output = ""
+        for i, s in enumerate(str_arr):
+            if i != 0:
+                output += '\n'
+            output += s
+            
+        return output
+                                 
 def treeFromArray(arr):
     """ Creates a BST from the keys in a given array.
     type arr: List[]
@@ -180,9 +219,93 @@ def treeFromArray(arr):
     for k in arr:
         tree.insert(Node(k))
     return tree
+
+def randomTest(count):
+    passed = True
+    arr = []
+    tree = BST()
+
+    i = 0
+    while i < count:
+        v = random.randint(-999,999)
+        if v not in arr:
+            arr.append(v)
+            tree.insert(Node(v))
+            i += 1
+            
+    arr.sort()
+    if not compare(tree, arr):
+        printErrorMessage(tree, arr, ", after insertions")
+        passed = False
+
+    for i in range(len(arr)//2):
+        v = arr[i]
+        arr.remove(v)
+        n = tree.search(v)
+        tree.delete(n)
+    
+    if not compare(tree, arr):
+        printErrorMessage(tree, arr, ", after known deletions")
+        passed = False
+
+    for i in range(count//2):
+        v = random.randint(-1000,1000)
+        if v in arr:
+            arr.remove(v)
+        n = tree.search(v)
+        tree.delete(n)
+
+    if not compare(tree, arr):
+        printErrorMessage(tree, arr, ", after random deletions")
+        passed = False
+
+    for i in range(count//4):
+        v = random.randint(-1000,1000)
+        if v not in arr:
+            arr.append(v)
+            tree.insert(Node(v))
+    arr.sort()
+    if not compare(tree, arr):
+        printErrorMessage(tree, arr, ", after second insertions")
+        passed = False
+
+    return passed  
+    
+def compare(tree, arr):
+    arr1 = tree.inorderWalk()
+    if len(arr) != len(arr1): return False
+    for i in range(len(arr)):
+        if arr[i] != arr1[i]: return False
+    return True
+
+def printErrorMessage(tree, arr, str = ""):
+    print "Failed comparison tests" + str
+    print "Tree:"
+    print tree
+    print "In order walk:"
+    print tree.inorderWalk()
+    print "Array:"
+    print arr
     
 def main():
-    arr = [21, 45, 1, 34, 8, -1, 100, -54, 60, 2]
+    for i in range(20):
+        passed = randomTest(100)
+        if passed:
+            print "Passed random test", i+1
+
+    tree = BST()
+    for i in range(20):
+        v = random.randint(-99, 99)
+        tree.insert(Node(v))
+
+    print "Height =", tree.height()
+    print "Minimum =", tree.minimum()
+    print "Maximum =", tree.maximum()
+    print "In-order Walk =", tree.inorderWalk()
+    print "Tree ="
+    print tree
+
+    arr = [21, 45, 1, 34, 8, -1, 99, -54, 60, 2]
     tree = treeFromArray(arr)
     print("Tree:")
     print(tree)
@@ -231,7 +354,6 @@ def main():
     print(tree.r)
     print(tree.r.right)
     print(tree.r.right.parent)
-    # print(tree.r.right.right.left)
 
 if __name__ == "__main__":
     main()
