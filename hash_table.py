@@ -58,8 +58,35 @@ class KeyValuePair(object):
         self.value = v
 
     def __eq__(self, other):
-        return self.key == other.key
+        if type(other) == KeyValuePair:
+            return self.key == other.key
+        else:
+            return self.key == other
 
+    def __le__(self, other):
+        if type(other) == KeyValuePair:
+            return self.key <= other.key
+        else:
+            return self.key <= other
+
+    def __lt__(self, other):
+        if type(other) == KeyValuePair:
+            return self.key < other.key
+        else:
+            return self.key < other  
+
+    def __ge__(self, other):
+        if type(other) == KeyValuePair:
+            return self.key >= other.key
+        else:
+            return self.key >= other  
+
+    def __gt__(self, other):
+        if type(other) == KeyValuePair:
+            return self.key > other.key
+        else:
+            return self.key > other    
+    
     def __str__(self):
         return "[" +str(self.key)+","+str(self.value)+"]"
     
