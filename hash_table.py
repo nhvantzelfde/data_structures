@@ -1,4 +1,5 @@
 import random
+import datetime
 
 class HashFunction(object):
     """ Simple hash function, for use with hash tables.
@@ -393,11 +394,17 @@ def randomTest(size):
     """
     ht = HashTable()
     dic = {}
+    time_ht = datetime.timedelta(0)
+    time_dic = datetime.timedelta(0)
 
     for i in range(size):
         k, v = random.randint(1,1000), random.randint(-999,999)
+        d = datetime.datetime.now()
         dic[k] = v
+        time_dic += (datetime.datetime.now() - d)
+        d = datetime.datetime.now()
         ht[k] = v
+        time_ht += (datetime.datetime.now() - d)
 
     correct = True
     if not compareHashTables(ht, dic):
@@ -409,9 +416,13 @@ def randomTest(size):
     for i in range(size//4):
         index = random.randint(0,len(keys)-1)
         k = keys[index]
+        d = datetime.datetime.now()
         if k in ht:
             del dic[k]
+        time_dic += (datetime.datetime.now() - d)
+        d = datetime.datetime.now()
         del ht[k]
+        time_ht += (datetime.datetime.now() - d)
 
     if not compareHashTables(ht, dic):
         print "Hash table comparison failed, after deletions. ht =", ht, " dic =", dic
@@ -419,16 +430,19 @@ def randomTest(size):
 
     for i in range(size//4):
         k = random.randint(-999,999)
+        d = datetime.datetime.now()
         if k in ht:
             del dic[k]
+        time_dic += (datetime.datetime.now() - d)
+        d = datetime.datetime.now()
         del ht[k]
+        time_ht += (datetime.datetime.now() - d)
 
     if not compareHashTables(ht, dic):
         print "Hash table comparison failed, after random deletions. ht =", ht, " dic =", dic
         correct = False 
 
-    print ht
-    print dic
+    print "Time comparison: HashTable",time_ht, "dictionary", time_dic
     
     return correct
 
@@ -461,7 +475,7 @@ def main():
 
     print "Random hash table testing:"
     for i in range(1,21):
-        if randomTest(20):
+        if randomTest(25000):
             print "Test #",i,"successful"
     print ""
 
