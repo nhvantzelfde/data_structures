@@ -291,6 +291,18 @@ class HashTable(object):
                 self.v[i].asArray(kvps)
         return kvps
 
+    def minimum(self):
+        """ Returns the minimum value in the table. """
+        vals = self.values()
+        if len(vals) == 0: return None
+        return min(self.values())
+
+    def maximum(self):
+        """ Returns the minimum value in the table. """
+        vals = self.values()
+        if len(vals) == 0: return None
+        return max(self.values())
+        
     def __getitem__(self, k):
         """ Allows retrieving a value by calling hashtable[k]. """
         return self.lookup(k)
@@ -398,7 +410,7 @@ def randomTest(size):
     time_dic = datetime.timedelta(0)
 
     for i in range(size):
-        k, v = random.randint(1,1000), random.randint(-999,999)
+        k, v = random.randint(1,100000), random.randint(-99999,99999)
         d = datetime.datetime.now()
         dic[k] = v
         time_dic += (datetime.datetime.now() - d)
@@ -453,6 +465,8 @@ def compareHashTables(ht, dic):
     """
     keys1 = ht.keys()
     keys2 = dic.keys()
+    vals1 = ht.values()
+    vals2 = dic.values()
 
     for k in keys1:
         if ht[k] != dic[k]:
@@ -461,6 +475,16 @@ def compareHashTables(ht, dic):
     for k in keys2:
         if ht[k] != dic[k]:
             return False
+
+    #if len(vals2) == 0:
+    #    minimum = None
+    #    maximum = None
+    #else:
+    #    minimum = min(vals2)
+    #    maximum = max(vals2)
+    #
+    #print "min", ht.minimum(), minimum
+    #print "max", ht.maximum(), maximum
 
     return True
 
