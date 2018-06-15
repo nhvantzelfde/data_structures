@@ -38,6 +38,7 @@ class SortedArray(object):
     Attributes:
         v = array of values contained within the SortedArray
     """
+    
     def __init__(self, values = None):
         """ Initializes an instance with optional array of values, sorting them. """
         if values:
