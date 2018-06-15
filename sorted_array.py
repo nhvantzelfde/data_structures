@@ -1,7 +1,8 @@
 import random
 
 def binarySearch(s_arr, target):
-    """ Returns the index of target in the given sorted array, or the index of where target should be inserted if it does not exist.
+    """
+    Returns the index of target in the given sorted array, or the index of where target should be inserted if it does not exist.
     type s_arr: List[], must be pre-sorted and items must be comparable
     type target: any comparable item to the items in s_arr
     rtype: int
@@ -30,7 +31,15 @@ def binarySearch(s_arr, target):
         mid = (low + high) // 2    
 
 class SortedArray(object):
+    """ Simple implementation of an always-sorted array.
+
+    Modification of values directly is not supported. Use insert() or delete() instead.
+
+    Attributes:
+        v = array of values contained within the SortedArray
+    """
     def __init__(self, values = None):
+        """ Initializes an instance with optional array of values, sorting them. """
         if values:
             self.v = sorted(values)
         else:
@@ -39,6 +48,7 @@ class SortedArray(object):
         self.__checkRep()
         
     def insert(self, value):
+        """ Inserts a new value into the array. Finds the insertion point in O(lg n) but may still require O(n) shifts. """
         i = binarySearch(self.v, value)
 
         self.v.append(None)
@@ -49,6 +59,7 @@ class SortedArray(object):
         self.__checkRep()
     
     def delete(self, value):
+        """ Deletes a value into the array. Does nothing if value does not exist. Finds the element in O(lg n) but may still require O(n) shifts. """
         i = binarySearch(self.v, value)
 
         if i < len(self.v) and self.v[i] == value:
@@ -59,6 +70,7 @@ class SortedArray(object):
         self.__checkRep()
     
     def index(self, value):
+        """ Returns the index of a given value in the array, or None if the value is not found. """
         i = binarySearch(self.v, value)
 
         if i < len(self.v) and self.v[i] == value:
@@ -66,29 +78,41 @@ class SortedArray(object):
         else: return None   
     
     def __len__(self):
+        """ Returns the length of the array. """
         return len(self.v)
     
     def __getitem__(self, k):
+        """ Supports using array[i] to get a value. """
         return self.v[k]
 
     def __setitem__(self, k, v):
+        """ Supports using array[i] = v to overwrite a value; maintains sorted order. """
         self.delete(self.v[k])
         self.insert(v)
         
     def __iter__(self):
+        """ Returns an iterator over the values. """
         return iter(self.v)
         
     def __str__(self):
+        """ Returns a string representation of the array. """
         return str(self.v)
         
     def __checkRep(self):
-        if True: # set to True for debugging
+        """ Checks the representation invariant for the array, namely that it is always sorted. Used for debugging only. """
+        if False: # set to True for debugging
             for i, n in enumerate(self.v):
                 if i == 0: continue
                 if n < self.v[i-1]: 
                     print "Invariant breach: element",n,"at index",i,"out of order"
     
 def randomTest(size):
+    """
+    Creates a SortedArray object and an normal Python list with random elements of a given size.
+    Compares the contents of the two objects after insertions and deletions.
+    Returns False if any test shows not equal; otherwise returns True.
+    Uses for testing the SortedArray class.
+    """
     s_arr = SortedArray()
     ar = []
 
@@ -124,9 +148,21 @@ def randomTest(size):
     ar.sort()
     if not compare(s_arr,ar): return False
 
+    # overwrites
+    for i in range(size//4):
+        index = random.randint(0,len(ar)-1)
+        value = random.randint(-10000,10000)
+        ar[index] = value
+        ar.sort()
+        s_arr[index] = value
+    if not compare(s_arr,ar): return False
+
     return True
 
 def compare(s_arr, ar):
+    """
+    Compares a SortedArray s_arr with a normal, pre-sorted Python List. Returns False if any elements of the two are different.
+    """
     if len(s_arr) != len(ar): return False
     for i in range(len(ar)):
         if ar[i] != s_arr[i]: return False
