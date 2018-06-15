@@ -76,7 +76,17 @@ class SortedArray(object):
         if i < len(self.v) and self.v[i] == value:
             return i
         else: return None   
-    
+
+    def minimum(self):
+        """ Returns the minimum element of the array. """
+        if len(self.v) == 0: return None
+        else: return self.v[0]
+
+    def maximum(self):
+        """ Returns the maximum element of the array. """
+        if len(self.v) == 0: return None
+        else: return self.v[-1]
+        
     def __len__(self):
         """ Returns the length of the array. """
         return len(self.v)
@@ -190,6 +200,7 @@ def main():
     s_arr[0] = 555
 
     print "After setting element i: s_arr =", s_arr, "sum = ", sum(s_arr)
+    print s_arr.minimum(), s_arr.maximum()
     
     error = False
     for i in range(len(test)):
