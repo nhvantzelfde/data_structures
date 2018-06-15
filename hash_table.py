@@ -143,7 +143,7 @@ class HashTable(object):
     """ Implementation of a hash table / dictionary, comparable to the built-in dict. Uses chaining.
 
     Supports lookup and insert in O(1) amortized. Uses table doubling / halving to grow and shrink the table, as requried.
-    Direct modification of the values or counts is not supported. Use insert() or delete() instead.
+    Direct modification of the values or counts is not supported. Use insert() and delete() instead.
 
     Attributes:
         n = number of distinct elements stored in the table
@@ -308,14 +308,21 @@ class HashTable(object):
     
     def __str__(self):
         """ Returns an string representation of the hash table. """
-        s = "Hash table: "
-        for i,l in enumerate(self.v):
-            s += "{"+str(l)+"}"
-            if i != len(self.v)-1:
-                s += ","
+        kvps = self.__kvps()
+
+        s = "{"
+        for i, kvp in enumerate(kvps):
+            s += str(kvp.key) + ": " + str(kvp.value)
+            if i != len(kvps)-1:
+                s += ", "
+        s += "}"
         return s
 
 def testHash():
+    """
+    Creates a hash function with a given m and hashes a set number of random integers, printing the number of times each slot is hashed to.
+    Used for testing purposes.
+    """
     m = 128
     h = HashFunction(m)
     print(h)
@@ -326,6 +333,9 @@ def testHash():
     print count
 
 def testTable():
+    """
+    Testing functions for HashTable. Outputs the result of various tests using print.
+    """
     ht = HashTable()
     
     keys = [1, 3, 78, 10, 200, 32, 2, 5, 200, 8, 73, 7, 500, 6, 121, 131, 150]
@@ -337,7 +347,7 @@ def testTable():
 
     print "HT initial: n=", ht.n, "m=", ht.m, "len(v)=", len(ht.v)
     for i in range(min(len(keys),len(values))):
-        ht.insert(keys[i],values[i])
+        ht[keys[i]] = values[i]
     print "HT after inserts: n=", ht.n, "m=", ht.m, "len(v)=", len(ht.v)
 
     keys1 = ht.keys()
@@ -356,7 +366,7 @@ def testTable():
         print "*** All lookups successful after inserts only ***"
 
     for d in deletes:
-        ht.delete(d)
+        del ht[d]
     print "HT after deletes: n=", ht.n, "m=", ht.m, "len(v)=", len(ht.v)
 
     keys1 = ht.keys()
@@ -375,6 +385,12 @@ def testTable():
         print "*** All lookups successful after inserts and deletes ***"
 
 def randomTest(size):
+    """
+    Creates a HashTable and dictionary with random elements of a given size.
+    Compares all elements of the HT and dic after insertions, deletions and failed / random deletions.
+    Returns True if the two all the same at all times, and False otherwise.
+    Used for testing this implementation of HashTable with the built-in versoin.
+    """
     ht = HashTable()
     dic = {}
 
@@ -411,9 +427,16 @@ def randomTest(size):
         print "Hash table comparison failed, after random deletions. ht =", ht, " dic =", dic
         correct = False 
 
+    print ht
+    print dic
+    
     return correct
 
 def compareHashTables(ht, dic):
+    """
+    Compares all contents of HashTable ht with dictionary dic.
+    Returns False if any values are different or missing in either object.
+    """
     keys1 = ht.keys()
     keys2 = dic.keys()
 
@@ -438,10 +461,8 @@ def main():
 
     print "Random hash table testing:"
     for i in range(1,21):
-        if randomTest(1000):
+        if randomTest(20):
             print "Test #",i,"successful"
-        else:
-            print "Test #",i,"failed"
     print ""
 
 if __name__ == "__main__":
