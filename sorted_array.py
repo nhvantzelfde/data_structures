@@ -4,7 +4,7 @@ def binarySearch(s_arr, target):
     """
     Returns the index of target in the given sorted array, or the index of where target should be inserted if it does not exist.
     type s_arr: List[], must be pre-sorted and items must be comparable
-    type target: any comparable item to the items in s_arr
+    type target: any object comparable to the items in s_arr
     rtype: int
     """
     if len(s_arr) == 0: return 0
