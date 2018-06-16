@@ -8,37 +8,37 @@ class Heap(object):
     Keys should not be manipulated directly, but rather by calling createHeap, insert, and extract.
 
     Attributes:
-        min_heap = True if the heap is a MinHeap, False if it is a MaxHeap
-        keys = list of keys in the heap
+        _min_heap = True if the heap is a MinHeap, False if it is a MaxHeap
+        _keys = list of keys in the heap
 
     """
     
     def __init__(self, min_heap):
         """ Initializes a heap. Use min_heap = True for a MinHeap / Priority Queue, and min_heap = False for a MaxHeap. """
-        self.min_heap = min_heap
-        self.keys = []
+        self._min_heap = min_heap
+        self._keys = []
 
     def createHeap(self, keys):
         """ Creates a heap from the given list of keys. Overwrites any existing keys in the heap. """
-        self.keys = list(keys)
-        for i in range(len(self.keys)//2-1,-1,-1):
-            self.__heapify(i)
+        self._keys = list(keys)
+        for i in range(len(self._keys)//2-1,-1,-1):
+            self._heapify(i)
         self.__checkRep()
 
     def modifyKey(self, i, key):
         """ Decreases (for a MinHeap) or increases (for a MaxHeap) the key at a given index. """
         if i >= self.size():
             return
-        elif self.isMinHeap() and key > self.keys[i]:
+        elif self.isMinHeap() and key > self._keys[i]:
             return
-        elif self.isMaxHeap() and key < self.keys[i]:
+        elif self.isMaxHeap() and key < self._keys[i]:
             return
         
-        self.keys[i] = key
-        p = self.__parent(i)
-        while i > 0 and self.__compareKeys(self.keys[i],self.keys[self.__parent(i)]):
-            self.keys[i], self.keys[self.__parent(i)] = self.keys[self.__parent(i)], self.keys[i]
-            i = self.__parent(i)
+        self._keys[i] = key
+        p = self._parent(i)
+        while i > 0 and self._compareKeys(self._keys[i],self._keys[self._parent(i)]):
+            self._keys[i], self._keys[self._parent(i)] = self._keys[self._parent(i)], self._keys[i]
+            i = self._parent(i)
             
         self.__checkRep()
 
@@ -47,22 +47,22 @@ class Heap(object):
         if self.size() == 0:
             return None
         elif self.isMinHeap():
-            return self.keys[0]
+            return self._keys[0]
         else:
-            return min(self.keys)
+            return min(self._keys)
 
     def maximum(self):
         """ Returns the maximum key in the heap. Takes O(1) for a MaxHeap and O(n) time for MinHeap. """
         if self.size() == 0:
             return None
         elif self.isMaxHeap():
-            return self.keys[0]
+            return self._keys[0]
         else:
-            return max(self.keys)
+            return max(self._keys)
         
     def extract(self):
         """ Extracts the minimum (for MinHeap) or maximum (for MaxHeap) key in the heap. """
-        return self.__extractIndex(0)
+        return self._extractIndex(0)
 
     def extractAll(self):
         """ Extracts all elements in order. Heap becomes empty. """
@@ -78,19 +78,19 @@ class Heap(object):
         else:
             default = -float("inf")
             
-        self.keys.append(default)
-        self.modifyKey(self.__last(),key)
+        self._keys.append(default)
+        self.modifyKey(self._last(),key)
         
     def delete(self, key):
         """ Deletes the first instance of a key from the heap. Does nothing if the key does not exist. """
-        for i in range(len(self.keys)):
-            if self.keys[i] == key:
-                self.__extractIndex(i)
+        for i in range(len(self._keys)):
+            if self._keys[i] == key:
+                self._extractIndex(i)
                 break
     
     def isMinHeap(self):
         """ Returns True if the heap is a MinHeap, and False otherwise. """
-        return self.min_heap
+        return self._min_heap
     
     def isMaxHeap(self):
         """ Returns True if the heap is a MaxHeap, and False otherwise. """
@@ -100,82 +100,82 @@ class Heap(object):
         """ Returns the size / length of the heap. """
         return len(self)
 
-    def __heapify(self, i):
+    def _heapify(self, i):
         """ Fixes the heap invariant at a given index. """
-        l = self.__left(i)
-        r = self.__right(i)
+        l = self._left(i)
+        r = self._right(i)
         current = i
-        if l < self.size() and self.__compareKeys(self.keys[l],self.keys[current]):
+        if l < self.size() and self._compareKeys(self._keys[l],self._keys[current]):
             current = l
-        if r < self.size() and self.__compareKeys(self.keys[r],self.keys[current]):
+        if r < self.size() and self._compareKeys(self._keys[r],self._keys[current]):
             current = r
         if current != i:
-            self.keys[i], self.keys[current] = self.keys[current], self.keys[i]
-            self.__heapify(current)
+            self._keys[i], self._keys[current] = self._keys[current], self._keys[i]
+            self._heapify(current)
 
-    def __compareKeys(self, k1, k2):
+    def _compareKeys(self, k1, k2):
         """ Returns either k1 < k2 (for MinHeap) or k1 > k2 (for MaxHeap). Used in heapify and modifyKey. """
         if self.isMinHeap():
             return k1 < k2
         else:
             return k1 > k2
 
-    def __extractIndex(self, i):
+    def _extractIndex(self, i):
         """ Removes and returns the key at a given index. """
         if i >= self.size(): return None
         else:
-            self.keys[i], self.keys[self.__last()] = self.keys[self.__last()], self.keys[i]
-            result = self.keys.pop()
+            self._keys[i], self._keys[self._last()] = self._keys[self._last()], self._keys[i]
+            result = self._keys.pop()
 
-            p = self.__parent(i)
-            l = self.__left(i)
-            r = self.__right(i)
+            p = self._parent(i)
+            l = self._left(i)
+            r = self._right(i)
             
-            if i == 0 or (l < self.size() and self.__compareKeys(self.keys[l],self.keys[i])) or (r < self.size() and self.__compareKeys(self.keys[r],self.keys[i])):
-                self.__heapify(i)
+            if i == 0 or (l < self.size() and self._compareKeys(self._keys[l],self._keys[i])) or (r < self.size() and self._compareKeys(self._keys[r],self._keys[i])):
+                self._heapify(i)
             elif i < self.size():
-                self.modifyKey(i,self.keys[i])
+                self.modifyKey(i,self._keys[i])
             
             self.__checkRep()
             return result
         
-    def __parent(self, i):
+    def _parent(self, i):
         """ Returns the index of the parent of a given index. """
         return (i + 1) // 2 - 1
 
-    def __left(self, i):
+    def _left(self, i):
         """ Returns the index of the left child of a given index. """
         return 2 * (i + 1) - 1
 
-    def __right(self, i):
+    def _right(self, i):
         """ Returns the index of the right child of a given index. """
         return 2 * (i + 1)
 
-    def __last(self):
+    def _last(self):
         """ Returns the index of the last key in the heap. """
-        return len(self.keys)-1
+        return len(self._keys)-1
         
     def __len__(self):
         """ Returns the length / size of the heap. """
-        return len(self.keys)
+        return len(self._keys)
     
     def __str__(self):
         """ Returns a string representation of the heap. """
         if self.isMinHeap(): s = "Min"
         else: s = "Max"
-        s += "Heap, keys = " + str(self.keys)
+        s += "Heap, keys = " + str(self._keys)
         return s
 
     def __checkRep(self):
         """ Checks the rep invariant for the structure. Prints a message if the invariant is not met. For debugging. """
         if False: # set to True for debugging
             for i in range(self.size()):
-                l = self.__left(i)
-                r = self.__right(i)
-                if l < self.size() and self.__compareKeys(self.keys[l], self.keys[i]):
-                    print "Rep Invariant Error, index =", i, ", len =", self.size(), ", key =", self.keys[i], ", left =", self.keys[l]
-                if r < self.size() and self.__compareKeys(self.keys[r], self.keys[i]):
-                    print "Rep Invariant Error, index =", i, ", len =", self.size(), ", key =", self.keys[i], ", right =", self.keys[r]
+                l = self._left(i)
+                r = self._right(i)
+                if l < self.size() and self._compareKeys(self._keys[l], self._keys[i]):
+                    print "Rep Invariant Error, index =", i, ", len =", self.size(), ", key =", self._keys[i], ", left =", self._keys[l]
+                if r < self.size() and self._compareKeys(self._keys[r], self._keys[i]):
+                    print "Rep Invariant Error, index =", i, ", len =", self.size(), ", key =", self._keys[i], ", right =", self._keys[r]
 
 class MinHeap(Heap):
     """ MinHeap, with all functionality derived from Heap class.

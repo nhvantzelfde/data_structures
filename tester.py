@@ -16,7 +16,7 @@ def heapCompare(heap, ar1):
     if len(ar1) != len(heap): return False
 
     ar1.sort()
-    ar2 = heap.keys[:]
+    ar2 = heap._keys[:]
     ar2.sort()
 
     for i in range(len(ar1)):
@@ -302,10 +302,10 @@ def hashTableTest():
     test_answers1 = ["Omaha", "Dayton", "Boston", "NYC", "LA 2.0", "Chicago", "Baton Rouge", "Miami", "Toronto", "Calgary", None, None, None, None, None]
     test_answers2 = [None, None, None, None, None, None, "Baton Rouge", "Miami", None, "Calgary", None, None, None, None, None]
 
-    print "HT initial: n=", ht.n, "m=", ht.m, "len(v)=", len(ht.v)
+    print "HT initial: n=", ht._n, "m=", ht._m, "len(v)=", len(ht._v)
     for i in range(min(len(keys),len(values))):
         ht[keys[i]] = values[i]
-    print "HT after inserts: n=", ht.n, "m=", ht.m, "len(v)=", len(ht.v)
+    print "HT after inserts: n=", ht._n, "m=", ht._m, "len(v)=", len(ht._v)
 
     keys1 = ht.keys()
     values1 = ht.values()
@@ -324,7 +324,7 @@ def hashTableTest():
 
     for d in deletes:
         del ht[d]
-    print "HT after deletes: n=", ht.n, "m=", ht.m, "len(v)=", len(ht.v)
+    print "HT after deletes: n=", ht._n, "m=", ht._m, "len(v)=", len(ht._v)
 
     keys1 = ht.keys()
     values1 = ht.values()
@@ -332,6 +332,8 @@ def hashTableTest():
     print "Keys =", keys1
     print "Values =", values1
     print "HT.v =", ht
+    print "Minimum =", ht.minimum()
+    print "Maximum =", ht.maximum()
 
     error = False
     for i in range(min(len(test_keys),len(test_answers2))):
@@ -439,7 +441,7 @@ def hashTableFullTest():
     print "\nHash table testing:"
     hashTableTest()
 
-    print "\Random hash table testing:"
+    print "\nRandom hash table testing:"
     for i in range(1,21):
         if hashTableRandomTest(2000):
             print "Test #",i,"successful"
@@ -662,11 +664,11 @@ def AVLFullTest():
     print tree
     
 def main():
-    heapFullTest()
-    sortedArrayFullTest()
+    #heapFullTest()
+    #sortedArrayFullTest()
     hashTableFullTest()
-    BSTFullTest()
-    AVLFullTest()
+    #BSTFullTest()
+    #AVLFullTest()
 
 if __name__ == "__main__":
     main()

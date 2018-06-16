@@ -8,43 +8,46 @@ class HashFunction(object):
     Meant to be immutable once created. A new instance should be created for new m.
     
     Attributes:
-        d = size of the universe of keys
-        m = size of the hash table
-        p = prime between _d and 2*_d
-        a = random number between [1,p-1]
-        b = random number between [0,p-1]
+        (class) d = size of the universe of keys
+        _m = size of the hash table
+        _p = prime between d and 2*d
+        _a = random number between [1,_p - 1]
+        _b = random number between [0,_p - 1]
     """
+
+    d = 2**31-1
 
     def __init__(self, m):
         """ Initializes the instance with parameter m, the size of the hash table. """
-        self.d = 2**31-1
-        self.m = m
-        self.p = self.__findPrime(self.d)
-        self.a = random.randint(1,self.p-1)
-        self.b = random.randint(0,self.p-1)
+        self._m = m
+        self._p = HashFunction._findPrime(HashFunction.d)
+        self._a = random.randint(1,self._p-1)
+        self._b = random.randint(0,self._p-1)
+        
+    def h(self, k):
+        """ Returns the hash value for a given input key k. """
+        return ((self._a * k + self._b) % self._p) % self._m
 
-    def __findPrime(self, n):
+    @classmethod
+    def _findPrime(cls, n):
         """ Finds a prime, using brute force, greater than n. """
         t = max(3, n+1)
         if t % 2 == 0: t += 1
-        while not self.__isPrime(t):
+        while not cls._isPrime(t):
             t += 2
         return t
 
-    def __isPrime(self, n):
+    @classmethod
+    def _isPrime(cls, n):
         """ Determines whether a given integer n is prime or not. """
         if n == 1: return False
         for i in range(2,int(n**0.5)+1):
             if n % i == 0: return False
         return True
-        
-    def h(self, k):
-        """ Returns the hash value for a given input key k. """
-        return ((self.a * k + self.b) % self.p) % self.m
 
     def __str__(self):
         """ Returns a string representation of the hash function. """
-        return "Hash function: m = " + str(self.m) + ", p = " + str(self.p) + ", a = " + str(self.a) + ", b = " + str(self.b)
+        return "Hash function: m = " + str(self._m) + ", p = " + str(self._p) + ", a = " + str(self._a) + ", b = " + str(self._b)
 
 class LinkedList(object):
     """ Simple doubly-linked list.
@@ -146,31 +149,31 @@ class HashTable(object):
     Direct modification of the values or counts is not supported. Use insert() and delete() instead.
 
     Attributes:
-        n = number of distinct elements stored in the table
-        m = current size of the array
-        h = hash function
-        max_load = maximum load before the table grows
-        min_load = minimum load before the table shrinks; should be smaller than max_load to function properly
-        v = the array storing linked lists at each hash value
+        (class) max_load = maximum load before the table grows
+        (class) min_load = minimum load before the table shrinks; should be smaller than max_load to function properly
+        _n = number of distinct elements stored in the table
+        _m = current size of the array
+        _h = hash function
+        _v = the array storing linked lists at each hash value
     """
+
+    max_load = 1.00
+    min_load = 0.25
 
     def __init__(self):
         """ Initializes an empty hash table. """
-        self.n = 0
-        self.m = 8
-        self.h = HashFunction(self.m)
-        self.max_load = 1.00
-        self.min_load = 0.25
-        
-        self.v = [None] * self.m
+        self._n = 0
+        self._m = 8
+        self._h = HashFunction(self._m)
+        self._v = [None] * self._m
 
     def insert(self, k, v):
         """ Inserts a value into the hash table, keyed with the given key. If the key already exists in the hash table, the value is overwritten. """
-        h = self.h.h(k)
-        l = self.v[h]
+        h = self._h.h(k)
+        l = self._v[h]
 
         if not l:
-            self.v[h] = LinkedList(KeyValuePair(k,v))
+            self._v[h] = LinkedList(KeyValuePair(k,v))
         else:
             p = l.prev
             while l:
@@ -183,15 +186,15 @@ class HashTable(object):
             p.next = new
             new.prev = p
             
-        self.n += 1
+        self._n += 1
         
         if self.load() > self.max_load:
-            self.__grow()
+            self._grow()
 
     def delete(self, k):
         """ Deletes an entry in the hash table at a given key. If no such element exists, this does nothing. """
-        h = self.h.h(k)
-        l = self.v[h]
+        h = self._h.h(k)
+        l = self._v[h]
 
         if not l:
             return
@@ -204,44 +207,44 @@ class HashTable(object):
                         if l.next:
                             l.next.prev = p
                     else:
-                        self.v[h] = l.next
+                        self._v[h] = l.next
                         if l.next:
                             l.next.prev = None
-                    self.n -= 1
+                    self._n -= 1
                     break
                 p, l = l, l.next
             
             if self.load() < self.min_load:
-                self.__shrink()
+                self._shrink()
 
     def load(self):
         """ Returns the current load of the hash table. """
-        return (1. * self.n) / self.m 
+        return (1. * self._n) / self._m 
 
-    def __grow(self):
+    def _grow(self):
         """ Doubles the current size of the array storing the hash table. """
-        self.__rebuild(self.m*2)   
+        self._rebuild(self._m*2)   
     
-    def __shrink(self):
+    def _shrink(self):
         """ Halves the current size of the array storing the hash table. """
-        self.__rebuild(self.m/2) 
+        self._rebuild(self._m/2) 
 
-    def __rebuild(self,new_m):
+    def _rebuild(self,new_m):
         """ Rebuilds the array storing the hash table, at a given size new_m. """
-        kvps = self.__kvps()
+        kvps = self._kvps()
 
-        self.n = 0
-        self.m = new_m
-        self.h = HashFunction(self.m)
-        self.v = [None] * self.m
+        self._n = 0
+        self._m = new_m
+        self._h = HashFunction(self._m)
+        self._v = [None] * self._m
 
         for kvp in kvps:
             self.insert(kvp.key,kvp.value)  
 
     def lookup(self, k):
         """ Returns the value associated with key k, or None if no such value exists. """
-        h = self.h.h(k)
-        l = self.v[h]
+        h = self._h.h(k)
+        l = self._v[h]
 
         if not l: return None
         
@@ -253,8 +256,8 @@ class HashTable(object):
 
     def contains(self, k):
         """ Returns True if the key k is in the hash table, and False otherwise. """
-        h = self.h.h(k)
-        l = self.v[h]
+        h = self._h.h(k)
+        l = self._v[h]
 
         if not l: return False
         
@@ -266,7 +269,7 @@ class HashTable(object):
 
     def values(self):
         """ Returns an array representing all the values currently stored in the hash table. """
-        kvps = self.__kvps()
+        kvps = self._kvps()
 
         vals = []
         for i in range(len(kvps)):
@@ -275,19 +278,19 @@ class HashTable(object):
 
     def keys(self):
         """ Returns an array representing all the keys currently stored in the hash table. """
-        kvps = self.__kvps()
+        kvps = self._kvps()
 
         keys = []
         for i in range(len(kvps)):
             keys.append(kvps[i].key)
         return keys
 
-    def __kvps(self):
+    def _kvps(self):
         """ Returns an array with all the KeyValuePairs currently stored in the hash table. """
         kvps = []
-        for i in range(len(self.v)):
-            if self.v[i]:
-                self.v[i].asArray(kvps)
+        for i in range(len(self._v)):
+            if self._v[i]:
+                self._v[i].asArray(kvps)
         return kvps
 
     def minimum(self):
@@ -320,7 +323,7 @@ class HashTable(object):
     
     def __str__(self):
         """ Returns an string representation of the hash table. """
-        kvps = self.__kvps()
+        kvps = self._kvps()
 
         s = "{"
         for i, kvp in enumerate(kvps):
