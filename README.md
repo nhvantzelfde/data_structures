@@ -22,12 +22,12 @@ HashTable - hash table / dictionary, using table doubling -
     min O(n)
     max O(n) 
 
-MinHeap - minimum heap / priority queue, implemented in the "sorting" repository - 
+Heap - heap / priority queue, including both MinHeaps and MaxHeaps - 
     search O(n)
     insert O(lg n)
     delete O(lg n)
-    min O(1)
-    max O(n)
+    min O(1) for MinHeap, O(n) for MaxHeap
+    max O(n) for MinHeap, O(1) for MaxHeap
 
 SortedArray - always-sorted array - 
     search O(lg n)
