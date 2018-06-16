@@ -203,7 +203,6 @@ class MinHeap(Heap):
         """ Extracts the minimum key in the heap. Returns None if the heap is empty. """
         return super(MinHeap, self).extract()
 
-
 class MaxHeap(Heap):
     """ MaxHeap, with all functionality derived from Heap class.
 
@@ -229,5 +228,3 @@ class MaxHeap(Heap):
     def extractMax(self):
         """ Extracts the maximum key in the heap. Returns None if the heap is empty. """
         return super(MaxHeap, self).extract()
-
-
