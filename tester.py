@@ -1,6 +1,8 @@
 from heap import Heap, MinHeap, MaxHeap
 from sorted_array import SortedArray
+from hash_table import HashFunction, HashTable
 import random
+import datetime
 
 def heapCompare(heap, ar1):
     """
@@ -268,10 +270,180 @@ def sortedArrayFullTest():
     for i in range(20):
         if sortedArrayRandomTest(1000): print "Test",i+1,"successful"
         else: print "Failure at test",i+1
+
+def hashFunctionTest():
+    """
+    Creates a hash function with a given m and hashes a set number of random integers, printing the number of times each slot is hashed to.
+    Used for testing purposes.
+    """
+    m = 128
+    h = HashFunction(m)
+    print(h)
+
+    count = [0] * m
+    for i in range(m*2):
+        count[h.h(random.randint(-10000,10000))] += 1
+    print count
+
+def hashTableTest():
+    """
+    Testing functions for HashTable. Outputs the result of various tests using print.
+    """
+    ht = HashTable()
+    
+    keys = [1, 3, 78, 10, 200, 32, 2, 5, 200, 8, 73, 7, 500, 6, 121, 131, 150]
+    values = ["Omaha", "Dayton", "Boston", "NYC", "LA", "Chicago", "Baton Rouge", "Miami" , "LA 2.0", "Toronto", "Calgary", "Memphis", "Phoenix", "Seattle", "SF", "Des Moines", "Lincoln"]
+    deletes = [78, 8, 8, 10, 200, 32, 7, 500, 6, 121, 131, 150, 3, 1]
+    test_keys = [1, 3, 78, 10, 200, 32, 2, 5, 8, 73, 40, 31, 33, -100, 45]
+    test_answers1 = ["Omaha", "Dayton", "Boston", "NYC", "LA 2.0", "Chicago", "Baton Rouge", "Miami", "Toronto", "Calgary", None, None, None, None, None]
+    test_answers2 = [None, None, None, None, None, None, "Baton Rouge", "Miami", None, "Calgary", None, None, None, None, None]
+
+    print "HT initial: n=", ht.n, "m=", ht.m, "len(v)=", len(ht.v)
+    for i in range(min(len(keys),len(values))):
+        ht[keys[i]] = values[i]
+    print "HT after inserts: n=", ht.n, "m=", ht.m, "len(v)=", len(ht.v)
+
+    keys1 = ht.keys()
+    values1 = ht.values()
+    print "Sum of keys =",sum(keys1)
+    print "Keys =", keys1
+    print "Values =", values1
+    print "HT.v =", ht
+
+    error = False
+    for i in range(min(len(test_keys),len(test_answers1))):
+        if ht.lookup(test_keys[i]) != test_answers1[i]:
+            print "Failed lookup: i =", i, "key =", test_keys[i], "expected =", test_answers1[i], "actual =", ht.lookup(test_keys[i])
+            error = True
+    if not error:
+        print "*** All lookups successful after inserts only ***"
+
+    for d in deletes:
+        del ht[d]
+    print "HT after deletes: n=", ht.n, "m=", ht.m, "len(v)=", len(ht.v)
+
+    keys1 = ht.keys()
+    values1 = ht.values()
+    print "Sum of keys =",sum(keys1)
+    print "Keys =", keys1
+    print "Values =", values1
+    print "HT.v =", ht
+
+    error = False
+    for i in range(min(len(test_keys),len(test_answers2))):
+        if ht.lookup(test_keys[i]) != test_answers2[i]:
+            print "Failed lookup: i =", i, "key =", test_keys[i], "expected =", test_answers2[i], "actual =", ht.lookup(test_keys[i])
+            error = True
+    if not error:
+        print "*** All lookups successful after inserts and deletes ***"
+
+def hashTableRandomTest(size):
+    """
+    Creates a HashTable and dictionary with random elements of a given size.
+    Compares all elements of the HT and dic after insertions, deletions and failed / random deletions.
+    Returns True if the two all the same at all times, and False otherwise.
+    Used for testing this implementation of HashTable with the built-in versoin.
+    """
+    ht = HashTable()
+    dic = {}
+    time_ht = datetime.timedelta(0)
+    time_dic = datetime.timedelta(0)
+
+    for i in range(size):
+        k, v = random.randint(1,100000), random.randint(-99999,99999)
+        d = datetime.datetime.now()
+        dic[k] = v
+        time_dic += (datetime.datetime.now() - d)
+        d = datetime.datetime.now()
+        ht[k] = v
+        time_ht += (datetime.datetime.now() - d)
+
+    correct = True
+    if not hashTableCompare(ht, dic):
+        print "Hash table comparison failed, after insertions. ht =", ht, " dic =", dic
+        correct = False
+    
+    keys = dic.keys()
+
+    for i in range(size//4):
+        index = random.randint(0,len(keys)-1)
+        k = keys[index]
+        d = datetime.datetime.now()
+        if k in ht:
+            del dic[k]
+        time_dic += (datetime.datetime.now() - d)
+        d = datetime.datetime.now()
+        del ht[k]
+        time_ht += (datetime.datetime.now() - d)
+
+    if not hashTableCompare(ht, dic):
+        print "Hash table comparison failed, after deletions. ht =", ht, " dic =", dic
+        correct = False
+
+    for i in range(size//4):
+        k = random.randint(-999,999)
+        d = datetime.datetime.now()
+        if k in ht:
+            del dic[k]
+        time_dic += (datetime.datetime.now() - d)
+        d = datetime.datetime.now()
+        del ht[k]
+        time_ht += (datetime.datetime.now() - d)
+
+    if not hashTableCompare(ht, dic):
+        print "Hash table comparison failed, after random deletions. ht =", ht, " dic =", dic
+        correct = False 
+
+    print "Time comparison: HashTable",time_ht, "dictionary", time_dic
+    
+    return correct
+
+def hashTableCompare(ht, dic):
+    """
+    Compares all contents of HashTable ht with dictionary dic.
+    Returns False if any values are different or missing in either object.
+    """
+    keys1 = ht.keys()
+    keys2 = dic.keys()
+    vals1 = ht.values()
+    vals2 = dic.values()
+
+    for k in keys1:
+        if ht[k] != dic[k]:
+            return False
+
+    for k in keys2:
+        if ht[k] != dic[k]:
+            return False
+
+    #if len(vals2) == 0:
+    #    minimum = None
+    #    maximum = None
+    #else:
+    #    minimum = min(vals2)
+    #    maximum = max(vals2)
+    #
+    #print "min", ht.minimum(), minimum
+    #print "max", ht.maximum(), maximum
+
+    return True
+
+def hashTableFullTest():
+    print "\nHash function testing:"
+    hashFunctionTest()
+
+    print "\nHash table testing:"
+    hashTableTest()
+
+    print "\Random hash table testing:"
+    for i in range(1,21):
+        if hashTableRandomTest(2000):
+            print "Test #",i,"successful"
         
 def main():
     heapFullTest()
     sortedArrayFullTest()
+    hashTableFullTest()
 
 if __name__ == "__main__":
     main()
