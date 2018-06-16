@@ -1,4 +1,5 @@
 from heap import Heap, MinHeap, MaxHeap
+from sorted_array import SortedArray
 import random
 
 def heapCompare(heap, ar1):
@@ -168,8 +169,109 @@ def heapFullTest():
     print "Max: ar", max(ar), "min_heap", min_heap.maximum(), "max_heap", max_heap.maximum()
     print "Min: ar", min(ar), "min_heap", min_heap.minimum(), "max_heap", max_heap.minimum()
 
+def sortedArrayRandomTest(size):
+    """
+    Creates a SortedArray object and an normal Python list with random elements of a given size.
+    Compares the contents of the two objects after insertions and deletions.
+    Returns False if any test shows not equal; otherwise returns True.
+    Uses for testing the SortedArray class.
+    """
+    s_arr = SortedArray()
+    ar = []
+
+    # insertions
+    for i in range(size):
+        n = random.randint(-10000,10000)
+        ar.append(n)
+        s_arr.insert(n)
+    ar.sort()
+    if not sortedArrayCompare(s_arr,ar): return False
+
+    # known deletions
+    for i in range(size//2):
+        index = random.randint(0,len(ar)-1)
+        n = ar[i]
+        s_arr.delete(n)
+        ar.remove(n)
+    if not sortedArrayCompare(s_arr,ar): return False
+
+    # random deletions
+    for i in range(size//4):
+        n = random.randint(-10000,10000)
+        if n in ar:
+            ar.remove(n)
+        s_arr.delete(n)
+    if not sortedArrayCompare(s_arr,ar): return False
+
+    # more insertions
+    for i in range(size//4):
+        n = random.randint(-10000,10000)
+        ar.append(n)
+        s_arr.insert(n)
+    ar.sort()
+    if not sortedArrayCompare(s_arr,ar): return False
+
+    # overwrites
+    for i in range(size//4):
+        index = random.randint(0,len(ar)-1)
+        value = random.randint(-10000,10000)
+        ar[index] = value
+        ar.sort()
+        s_arr[index] = value
+    if not sortedArrayCompare(s_arr,ar): return False
+
+    return True
+
+def sortedArrayCompare(s_arr, ar):
+    """
+    Compares a SortedArray s_arr with a normal, pre-sorted Python List. Returns False if any elements of the two are different.
+    """
+    if len(s_arr) != len(ar): return False
+    for i in range(len(ar)):
+        if ar[i] != s_arr[i]: return False
+    return True 
+    
+def sortedArrayFullTest():
+    """
+    Various tests for SortedArray class, including insertion, deletion, and overwrites.
+    """
+    init = [1, 5, 2, 80, 42, 232, 10, -1]
+    adds = [2, 20, 423, 65, 4, 98, -1, 5, 10]
+    dels = [42, 232, -1, 5, 2000, -10]
+    test = [1, 2, 80, 10, 2, 20, 423, 65, 4, 98, 5, 10, 555]
+    test.sort()
+
+    print "\nTesting SortedArray: various operations"
+    print "Target sums: init=", sum(init),"after adds=", sum(init)+sum(adds), "test=", sum(test)
+    
+    s_arr = SortedArray(init)
+    print "After initial: s_arr =", s_arr, "sum = ", sum(s_arr)
+    for a in adds:
+        s_arr.insert(a)
+    print "After adds: s_arr =", s_arr, "sum = ", sum(s_arr)
+
+    for d in dels:
+        s_arr.delete(d)
+    print "After deletes: s_arr =", s_arr, "sum = ", sum(s_arr)
+
+    s_arr[0] = 555
+
+    print "After setting element i: s_arr =", s_arr, "sum = ", sum(s_arr)
+    print s_arr.minimum(), s_arr.maximum()
+    
+    error = False
+    for i in range(len(test)):
+        if test[i] != s_arr[i]:
+            print "Error at index",i," test =", test[i]," s_arr =",s_arr[i]
+
+    print "\nTesting SortedArray: random operations"
+    for i in range(20):
+        if sortedArrayRandomTest(1000): print "Test",i+1,"successful"
+        else: print "Failure at test",i+1
+        
 def main():
     heapFullTest()
+    sortedArrayFullTest()
 
 if __name__ == "__main__":
     main()
