@@ -1,27 +1,53 @@
-import random
 
 class Node(object):
+    """ Node class, for use in binary search trees.
+
+    Nodes hold a key value and contain pointers to connected nodes (parent, children).
+    All Node pointers and attributes must be maintained by the tree itself.
+
+    Attributes:
+        key = the key contained in this node
+        parent = the node's parent
+        left = the node's left child
+        right = the node's right child
+        height = the node's height in the tree, where leaf.height = 0; for use in AVL trees
+    """
+    
     def __init__(self, k = None):
+        """ Initializes a new Node, with optional key k. """
         self.key = k
         self.parent = None
         self.left = None
         self.right = None
-        self.height = None # for use in AVL trees, not used in BST implementation
+        self.height = None
 
     def children(self):
+        """ Returns the number of children of this Node. """
         children = 0
         if self.left: children += 1
         if self.right: children += 1
         return children
         
     def __str__(self):
+        """ Returns a string representation of this Node. """
         return "node: key = " + str(self.key) + ", # of children = " + str(self.children())
 
 class BST(object):
+    """ Binary search tree.
+
+    Builds and maintains a tree of Nodes from given keys. This class is not self-balancing but subclasses can be.
+    Representation invariant is that, for all nodes, key of the left child <= node's key <= key of the right child.
+
+    Attributes:
+        r = root node of the search tree
+    """
+    
     def __init__(self):
+        """ Initializes an empty BST. """
         self.r = None
 
     def insert(self, new):
+        """ Inserts a new Node into the tree. Duplicate keys are ignored. """
         node = self.r
         
         if node == None:
@@ -43,12 +69,12 @@ class BST(object):
                     break
                 else: node = node.right
             else:
-                # duplicate key, do nothing
-                break
+                break # duplicate key, do nothing
 
         self.__checkBSTRep()
 
     def delete(self, node):
+        """ Deteles a node from the tree. """
         if not node: return
 
         if node.left == None:
@@ -83,6 +109,7 @@ class BST(object):
         return result
 
     def search(self, key):
+        """ Returns a Node with given key, or None if no such Node exists in the tree. """
         node = self.r
 
         while node:
@@ -95,6 +122,7 @@ class BST(object):
         return node
             
     def successor(self, node):
+        """ Returns the Node with the next largest key to the given node, or None if no such Node exists. """
         if not node: return None
         if node.right:
             return self.__subtreeMinimum(node.right)
@@ -107,6 +135,7 @@ class BST(object):
             return p
 
     def predecessor(self, node):
+        """ Returns the Node with the next smallest key to the given node, or None if no such Node exists. """
         if not node: return None
         if node.left:
             return self.__subtreeMaximum(node.left)
@@ -119,30 +148,37 @@ class BST(object):
             return p
 
     def inorderWalk(self):
+        """ Returns an (sorted) array of elements from an in-order walk of the BST. """
         arr = []
         self.__subtreeWalk(self.r, arr)
         return arr
 
     def minimum(self):
+        """ Returns the Node with the minimum key in the BST. """
         return self.__subtreeMinimum(self.r)
 
     def maximum(self):
+        """ Returns the Node with the maximum key in the BST. """
         return self.__subtreeMaximum(self.r)
 
     def height(self):
+        """ Returns the height of the root node. Note that height of a leaf is 0. This takes O(n) to calculate in this class. """
         return self.__height(self.r)
 
     def __subtreeMinimum(self, node):
+        """ Returns the Node with the minimum key in the subtree rooted at node. """
         while node and node.left:
             node = node.left
         return node
 
     def __subtreeMaximum(self, node):
+        """ Returns the Node with the maximum key in the subtree rooted at node. """
         while node and node.right:
             node = node.right
         return node
 
     def __subtreeWalk(self, node, arr):
+        """ Appends the values of the keys in the subtree rooted at node to the passed array. Modifies the array in place. """
         if not node: return
         else:
             self.__subtreeWalk(node.left, arr)
@@ -150,6 +186,7 @@ class BST(object):
             self.__subtreeWalk(node.right, arr)
     
     def __transplant(self, n1, n2):
+        """ Puts Node n2 in Node n1's current spot in the tree, effectively removing n1. Used for delete. """
         p = n1.parent
         
         if p == None: self.r = n2
@@ -158,16 +195,18 @@ class BST(object):
 
         if n2: n2.parent = p
         
-
     def __height(self, node):
+        """ Returns the height of a given node. Note that the height of a leaf is 0. """
         if not node: return -1
         return 1 + max(self.__height(node.left),self.__height(node.right))
 
     def __checkBSTRep(self):
+        """ Recursively checks whether each Node meets the rep invariant (i.e. node.left.key <= node.key <= node.right.key). For debugging. """
         if False: # set to True for debugging
             self.__checkNodeRep(self.r)
         
     def __checkNodeRep(self, node):
+        """ Checks whether each and its children meet the rep invariant. For debugging. """
         if not node: return
 
         if node.left and node.left.parent != node:
@@ -184,6 +223,7 @@ class BST(object):
         self.__checkNodeRep(node.right)
 
     def __strHelper(self, str_arr, node, depth, max_depth, leaf_width = 4):
+        """ Used recursively to create a properly formatted string with elements in correct columns. """
         if depth >= max_depth:
             return 0
 
@@ -221,6 +261,7 @@ class BST(object):
         return width
         
     def __str__(self):
+        """ Returns a string representation of the BST. """
         str_arr = [""] * (self.height() + 1)
         self.__strHelper(str_arr, self.r, 0, len(str_arr))
         output = ""
@@ -230,158 +271,3 @@ class BST(object):
             output += s
             
         return output
-                                 
-def treeFromArray(arr):
-    """ Creates a BST from the keys in a given array.
-    type arr: List[]
-    rtype: BST
-    """
-    tree = BST()
-    for k in arr:
-        tree.insert(Node(k))
-    return tree
-
-def randomTest(tree, count):
-    passed = True
-    arr = []
-
-    i = 0
-    while i < count:
-        v = random.randint(-999,999)
-        if v not in arr:
-            arr.append(v)
-            tree.insert(Node(v))
-            i += 1
-            
-    arr.sort()
-    if not compare(tree, arr):
-        printErrorMessage(tree, arr, ", after insertions")
-        passed = False
-
-    for i in range(len(arr)//2):
-        v = arr[i]
-        arr.remove(v)
-        n = tree.search(v)
-        tree.delete(n)
-    
-    if not compare(tree, arr):
-        printErrorMessage(tree, arr, ", after known deletions")
-        passed = False
-
-    for i in range(count//2):
-        v = random.randint(-1000,1000)
-        if v in arr:
-            arr.remove(v)
-        n = tree.search(v)
-        tree.delete(n)
-
-    if not compare(tree, arr):
-        printErrorMessage(tree, arr, ", after random deletions")
-        passed = False
-
-    for i in range(count//4):
-        v = random.randint(-1000,1000)
-        if v not in arr:
-            arr.append(v)
-            tree.insert(Node(v))
-    arr.sort()
-    if not compare(tree, arr):
-        printErrorMessage(tree, arr, ", after second insertions")
-        passed = False
-
-    return passed  
-    
-def compare(tree, arr):
-    arr1 = tree.inorderWalk()
-    if len(arr) != len(arr1): return False
-    for i in range(len(arr)):
-        if arr[i] != arr1[i]: return False
-    return True
-
-def printErrorMessage(tree, arr, str = ""):
-    print "Failed comparison tests" + str
-    print "Tree:"
-    print tree
-    print "In order walk:"
-    print tree.inorderWalk()
-    print "Array:"
-    print arr
-    
-def main():
-    for i in range(20):
-        tree = BST()
-        passed = randomTest(tree, 100)
-        if passed:
-            print "Passed random test", i+1
-
-    tree = BST()
-    for i in range(20):
-        v = random.randint(-99, 99)
-        tree.insert(Node(v))
-
-    print "Height =", tree.height()
-    print "Minimum =", tree.minimum()
-    print "Maximum =", tree.maximum()
-    print "In-order Walk =", tree.inorderWalk()
-    print "Tree ="
-    print tree
-
-    arr = [21, 45, 1, 34, 8, -1, 99, -54, 60, 2]
-    tree = treeFromArray(arr)
-    print("Tree:")
-    print(tree)
-    print("Root:")
-    print(tree.r)
-    print("In order walk:")
-    print(tree.inorderWalk())
-    print("Min, max:")
-    print(str(tree.minimum()),str(tree.maximum()))
-
-    print("Height = ",tree.height())
-    
-    print("Successor of 34:")
-    n = tree.search(34)
-    s = tree.successor(n)
-    print(s)
-
-    print("Successor of 100:")
-    n = tree.search(100)
-    s = tree.successor(n)
-    print(s)
-
-    print("Predecessor of 34:")
-    n = tree.search(34)
-    s = tree.predecessor(n)
-    print(s)
-
-    print("Predecessor of -54:")
-    n = tree.search(-54)
-    s = tree.predecessor(n)
-    print(s)
-    
-    print("Find and delete 34:")
-    n = tree.search(34)
-    print(n)
-    tree.delete(n)
-    print(tree.inorderWalk())
-
-    print("Find and delete 21:")
-    n = tree.search(21)
-    s = tree.successor(n)
-    print(n)
-    print(s)
-    tree.delete(n)
-    print(tree.inorderWalk())
-    print(tree.r)
-    print(tree.r.right)
-    print(tree.r.right.parent)
-
-if __name__ == "__main__":
-    main()
-    
-        
-    
-        
-
-
-        

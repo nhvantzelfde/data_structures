@@ -1,6 +1,7 @@
 from heap import Heap, MinHeap, MaxHeap
 from sorted_array import SortedArray
 from hash_table import HashFunction, HashTable
+from BST import BST, Node
 import random
 import datetime
 
@@ -439,11 +440,180 @@ def hashTableFullTest():
     for i in range(1,21):
         if hashTableRandomTest(2000):
             print "Test #",i,"successful"
-        
+
+def BSTFromArray(arr):
+    """
+    Creates a BST from the keys in a given array.
+    type arr: List[]
+    rtype: BST
+    """
+    tree = BST()
+    for k in arr:
+        tree.insert(Node(k))
+    return tree
+
+def BSTRandomTest(tree, size):
+    """
+    Fills a BST of a given size, with random elements.
+    Tests the contents of the BST with an array, after insertions and deletions.
+    Returns Tree if the contents of the BST are identical to the array at all times.
+    For BST class and subclass testing.
+    """
+    passed = True
+    ar = []
+
+    # insertions
+    for i in range(size):
+        v = random.randint(-999,999)
+        if v not in ar:
+            ar.append(v)
+            tree.insert(Node(v))
+            
+    ar.sort()
+    if not BSTCompare(tree, ar):
+        BSTPrintErrorMessage(tree, ar, ", after insertions")
+        passed = False
+
+    # known deletions
+    for i in range(len(ar)//2):
+        v = ar[i]
+        ar.remove(v)
+        n = tree.search(v)
+        tree.delete(n)
+    
+    if not BSTCompare(tree, ar):
+        BSTPrintErrorMessage(tree, ar, ", after known deletions")
+        passed = False
+
+    # random deletions
+    for i in range(size//2):
+        v = random.randint(-1000,1000)
+        if v in ar:
+            ar.remove(v)
+        n = tree.search(v)
+        tree.delete(n)
+
+    if not BSTCompare(tree, ar):
+        BSTPrintErrorMessage(tree, ar, ", after random deletions")
+        passed = False
+
+    # additional insertions
+    for i in range(size//4):
+        v = random.randint(-1000,1000)
+        if v not in ar:
+            ar.append(v)
+            tree.insert(Node(v))
+    ar.sort()
+    if not BSTCompare(tree, ar):
+        BSTPrintErrorMessage(tree, ar, ", after second insertions")
+        passed = False
+
+    return passed  
+    
+def BSTCompare(tree, ar):
+    """ Compares the output of an InOrder Walk on a BST with a sorted array.
+    Returns True if all elements are the same, and False otherwise.
+    For BST class testing.
+    """
+    ar1 = tree.inorderWalk()
+    if len(ar) != len(ar1): return False
+    for i in range(len(ar)):
+        if ar[i] != ar1[i]: return False
+    return True
+
+def BSTPrintErrorMessage(tree, arr, str = ""):
+    """
+    Prints an error message from a BST test, along with the BST and the comparison array.
+    For BST class testing.
+    """
+    print "Failed comparison tests" + str
+    print "Tree:"
+    print tree
+    print "In order walk:"
+    print tree.inorderWalk()
+    print "Array:"
+    print arr
+    
+def BSTFullTest():
+    """
+    Various tests for the BST class, including insertion, deletion, inorder walks, etc.
+    For BST class testing.
+    """
+    print "\nTesting BST: random tests"
+    for i in range(20):
+        tree = BST()
+        passed = BSTRandomTest(tree, 1000)
+        if passed:
+            print "Passed random test", i+1
+
+    print "\nTesting BST: various operations"
+    tree = BST()
+    for i in range(20):
+        v = random.randint(-99, 99)
+        tree.insert(Node(v))
+
+    print "Height =", tree.height()
+    print "Minimum =", tree.minimum()
+    print "Maximum =", tree.maximum()
+    print "In-order Walk =", tree.inorderWalk()
+    print "Random tree ="
+    print tree
+
+    arr = [21, 45, 1, 34, 8, -1, 99, -54, 60, 2]
+    tree = BSTFromArray(arr)
+    print("Test tree:")
+    print(tree)
+    print("Root:")
+    print(tree.r)
+    print("In order walk:")
+    print(tree.inorderWalk())
+    print("Min, max:")
+    print(str(tree.minimum()),str(tree.maximum()))
+
+    print("Height = ",tree.height())
+    
+    print("Successor of 34:")
+    n = tree.search(34)
+    s = tree.successor(n)
+    print(s)
+
+    print("Successor of 100:")
+    n = tree.search(100)
+    s = tree.successor(n)
+    print(s)
+
+    print("Predecessor of 34:")
+    n = tree.search(34)
+    s = tree.predecessor(n)
+    print(s)
+
+    print("Predecessor of -54:")
+    n = tree.search(-54)
+    s = tree.predecessor(n)
+    print(s)
+    
+    print("Find and delete 34:")
+    n = tree.search(34)
+    print(n)
+    tree.delete(n)
+    print(tree.inorderWalk())
+
+    print("Find and delete 21:")
+    n = tree.search(21)
+    s = tree.successor(n)
+    print(n)
+    print(s)
+    tree.delete(n)
+    print(tree.inorderWalk())
+    print(tree.r)
+    print(tree.r.right)
+    print(tree.r.right.parent)
+    
 def main():
     heapFullTest()
     sortedArrayFullTest()
     hashTableFullTest()
+    BSTFullTest()
 
 if __name__ == "__main__":
     main()
