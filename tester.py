@@ -569,7 +569,7 @@ def BSTFullTest():
     print("Test tree:")
     print(tree)
     print("Root:")
-    print(tree.r)
+    print(tree._r)
     print("In order walk:")
     print(tree.inorderWalk())
     print("Min, max:")
@@ -610,9 +610,9 @@ def BSTFullTest():
     print(s)
     tree.delete(n)
     print(tree.inorderWalk())
-    print(tree.r)
-    print(tree.r.right)
-    print(tree.r.right.parent)
+    print(tree._r)
+    print(tree._r.right)
+    print(tree._r.right.parent)
 
 def AVLFullTest():
     for i in range(30):
@@ -666,9 +666,9 @@ def AVLFullTest():
 def main():
     #heapFullTest()
     #sortedArrayFullTest()
-    hashTableFullTest()
+    #hashTableFullTest()
     #BSTFullTest()
-    #AVLFullTest()
+    AVLFullTest()
 
 if __name__ == "__main__":
     main()

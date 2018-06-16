@@ -16,12 +16,12 @@ class AVL(BST):
         """ Inserts a given Node into the tree. """
         # insert into BST
         super(AVL, self).insert(new)
-        self.__updateHeight(new)
+        self._updateHeight(new)
 
         # restore AVL property, working up the tree
-        self.__fixAVL(new.parent)
+        self._fixAVL(new.parent)
 
-        self.__checkAVLRep()
+        self.__checkRep()
     
     def delete(self, node):
         """ Deletes a given Node from the tree. """
@@ -31,34 +31,34 @@ class AVL(BST):
         suc = super(AVL, self).delete(node)
 
         # restore AVL property, working up the tree
-        self.__fixAVL(suc)
+        self._fixAVL(suc)
 
-        self.__checkAVLRep()
+        self.__checkRep()
 
-    def __fixAVL(self, node):
+    def _fixAVL(self, node):
         """ Fixes the AVL property of the tree, updating node heights and making rotations as necessary. """
         while node:
-            if abs(self.__height(node.left) - self.__height(node.right)) <= 1:
+            if abs(self._height(node.left) - self._height(node.right)) <= 1:
                 # AVL property is met; no rotates needed
-                self.__updateHeight(node)
-            elif self.__height(node.left) > self.__height(node.right):
+                self._updateHeight(node)
+            elif self._height(node.left) > self._height(node.right):
                 # left-heavy tree
                 l_child = node.left
-                if l_child and self.__height(l_child.right) > self.__height(l_child.left):
+                if l_child and self._height(l_child.right) > self._height(l_child.left):
                     # left child is right-heavy
-                    self.__rotateLeft(l_child)
-                self.__rotateRight(node)
+                    self._rotateLeft(l_child)
+                self._rotateRight(node)
             else:
                 # right-heavy tree
                 r_child = node.right
-                if r_child and self.__height(r_child.left) > self.__height(r_child.right):
+                if r_child and self._height(r_child.left) > self._height(r_child.right):
                     # right child is left-heavy, first rotate that right
-                    self.__rotateRight(r_child)
-                self.__rotateLeft(node)
+                    self._rotateRight(r_child)
+                self._rotateLeft(node)
 
             node = node.parent
         
-    def __rotateLeft(self, node):
+    def _rotateLeft(self, node):
         """ Rotates the given node to the left, fixing subtrees as required. """
         # new parent of node
         new_p = node.right
@@ -66,7 +66,7 @@ class AVL(BST):
         # update parent
         new_p.parent = node.parent
         if not new_p.parent:
-            self.r = new_p
+            self._r = new_p
         else:
             if new_p.parent.left == node:
                 new_p.parent.left = new_p
@@ -83,10 +83,10 @@ class AVL(BST):
         node.parent = new_p
 
         # update heights
-        self.__updateHeight(node)
-        self.__updateHeight(new_p)
+        self._updateHeight(node)
+        self._updateHeight(new_p)
 
-    def __rotateRight(self, node):
+    def _rotateRight(self, node):
         """ Rotates the given node to the right, fixing subtrees as required. """
         # new parent of node
         new_p = node.left
@@ -94,7 +94,7 @@ class AVL(BST):
         # update parent
         new_p.parent = node.parent
         if not new_p.parent:
-            self.r = new_p
+            self._r = new_p
         else:
             if new_p.parent.left == node:
                 new_p.parent.left = new_p
@@ -111,39 +111,39 @@ class AVL(BST):
         node.parent = new_p
 
         # update heights
-        self.__updateHeight(node)
-        self.__updateHeight(new_p)
+        self._updateHeight(node)
+        self._updateHeight(new_p)
 
     def height(self):
         """ Returns the height of the tree. Note that the height of a leaf is 0. This takes O(1) time. """
-        return self.__height(self.r)
+        return self._height(self._r)
         
-    def __height(self, node):
+    def _height(self, node):
         """ Returns the height of a given Node. Note that the height of a leaf is 0. """
         if not node:
             return -1
         else:
             return node.height
         
-    def __updateHeight(self, node):
+    def _updateHeight(self, node):
         """ Updates the height of a given Node, using children's heights. """
         if not node: return
         else:
-            node.height = 1 + max(self.__height(node.left), self.__height(node.right))
+            node.height = 1 + max(self._height(node.left), self._height(node.right))
 
-    def __checkAVLRep(self):
+    def __checkRep(self):
         """ Recursively checks whether each node meets the AVL rep. invariant (|left.height - right-height| <= 1). """
         if False: # set to True for debugging
-            self.__checkHeightRep(self.r)
+            self.__checkHeightRep(self._r)
         
     def __checkHeightRep(self, node):
         """ Checks whether a Node and its children meet the AVL rep. invariant. For debugging purposes. """
         if not node: return
 
-        if self.__height(node) != 1 + max(self.__height(node.left), self.__height(node.right)):
+        if self._height(node) != 1 + max(self._height(node.left), self._height(node.right)):
             print "Rep error: height not equal to [max(children) + 1]; node =", node
 
-        if abs(self.__height(node.left) - self.__height(node.right)) > 1:
+        if abs(self._height(node.left) - self._height(node.right)) > 1:
             print "Rep error: height of children differs by more than 1; node =", node
 
         self.__checkHeightRep(node.left)

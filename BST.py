@@ -39,19 +39,19 @@ class BST(object):
     Representation invariant is that, for all nodes, key of the left child <= node's key <= key of the right child.
 
     Attributes:
-        r = root node of the search tree
+        _r = root node of the search tree
     """
     
     def __init__(self):
         """ Initializes an empty BST. """
-        self.r = None
+        self._r = None
 
     def insert(self, new):
         """ Inserts a new Node into the tree. Duplicate keys are ignored. """
-        node = self.r
+        node = self._r
         
         if node == None:
-            self.r = new
+            self._r = new
             new.parent = None
             return
         
@@ -71,22 +71,22 @@ class BST(object):
             else:
                 break # duplicate key, do nothing
 
-        self.__checkBSTRep()
+        self.__checkRep()
 
     def delete(self, node):
         """ Deteles a node from the tree. """
         if not node: return
 
         if node.left == None:
-            self.__transplant(node,node.right)
+            self._transplant(node,node.right)
             if node.right:
                 result = node.right
             else: result = node.parent
         elif node.right == None:
-            self.__transplant(node,node.left)
+            self._transplant(node,node.left)
             result = node.left
         else:
-            suc = self.__subtreeMinimum(node.right)
+            suc = self._subtreeMinimum(node.right)
 
             if suc.right: result = suc.right
             else: result = suc
@@ -97,20 +97,20 @@ class BST(object):
                 else:
                     result = suc.parent
                 
-                self.__transplant(suc,suc.right)
+                self._transplant(suc,suc.right)
                 suc.right = node.right
                 suc.right.parent = suc 
-            self.__transplant(node,suc)
+            self._transplant(node,suc)
             suc.left = node.left
             suc.left.parent = suc
             
-        self.__checkBSTRep()
+        self.__checkRep()
 
         return result
 
     def search(self, key):
         """ Returns a Node with given key, or None if no such Node exists in the tree. """
-        node = self.r
+        node = self._r
 
         while node:
             if key == node.key:
@@ -125,7 +125,7 @@ class BST(object):
         """ Returns the Node with the next largest key to the given node, or None if no such Node exists. """
         if not node: return None
         if node.right:
-            return self.__subtreeMinimum(node.right)
+            return self._subtreeMinimum(node.right)
         else:
             p = node.parent
             while p:
@@ -138,7 +138,7 @@ class BST(object):
         """ Returns the Node with the next smallest key to the given node, or None if no such Node exists. """
         if not node: return None
         if node.left:
-            return self.__subtreeMaximum(node.left)
+            return self._subtreeMaximum(node.left)
         else:
             p = node.parent
             while p:
@@ -150,60 +150,110 @@ class BST(object):
     def inorderWalk(self):
         """ Returns an (sorted) array of elements from an in-order walk of the BST. """
         arr = []
-        self.__subtreeWalk(self.r, arr)
+        self._subtreeWalk(self._r, arr)
         return arr
 
     def minimum(self):
         """ Returns the Node with the minimum key in the BST. """
-        return self.__subtreeMinimum(self.r)
+        return self._subtreeMinimum(self._r)
 
     def maximum(self):
         """ Returns the Node with the maximum key in the BST. """
-        return self.__subtreeMaximum(self.r)
+        return self._subtreeMaximum(self._r)
 
     def height(self):
         """ Returns the height of the root node. Note that height of a leaf is 0. This takes O(n) to calculate in this class. """
-        return self.__height(self.r)
+        return self._height(self._r)
 
-    def __subtreeMinimum(self, node):
+    def _subtreeMinimum(self, node):
         """ Returns the Node with the minimum key in the subtree rooted at node. """
         while node and node.left:
             node = node.left
         return node
 
-    def __subtreeMaximum(self, node):
+    def _subtreeMaximum(self, node):
         """ Returns the Node with the maximum key in the subtree rooted at node. """
         while node and node.right:
             node = node.right
         return node
 
-    def __subtreeWalk(self, node, arr):
+    def _subtreeWalk(self, node, arr):
         """ Appends the values of the keys in the subtree rooted at node to the passed array. Modifies the array in place. """
         if not node: return
         else:
-            self.__subtreeWalk(node.left, arr)
+            self._subtreeWalk(node.left, arr)
             arr.append(node.key)
-            self.__subtreeWalk(node.right, arr)
+            self._subtreeWalk(node.right, arr)
     
-    def __transplant(self, n1, n2):
+    def _transplant(self, n1, n2):
         """ Puts Node n2 in Node n1's current spot in the tree, effectively removing n1. Used for delete. """
         p = n1.parent
         
-        if p == None: self.r = n2
+        if p == None: self._r = n2
         elif p.left == n1: p.left = n2
         else: p.right = n2
 
         if n2: n2.parent = p
         
-    def __height(self, node):
+    def _height(self, node):
         """ Returns the height of a given node. Note that the height of a leaf is 0. """
         if not node: return -1
-        return 1 + max(self.__height(node.left),self.__height(node.right))
+        return 1 + max(self._height(node.left),self._height(node.right))
 
-    def __checkBSTRep(self):
+    def _strHelper(self, str_arr, node, depth, max_depth, leaf_width = 4):
+        """ Used recursively to create a properly formatted string with elements in correct columns. """
+        if depth >= max_depth:
+            return 0
+
+        if not node:
+            if depth < max_depth - 1:
+                width = self._strHelper(str_arr, None, depth+1, max_depth, leaf_width)
+                curr_depth = depth + 1
+                while curr_depth < max_depth:
+                    str_arr[curr_depth] += " "
+                    curr_depth += 1
+                width += 1
+                width += self._strHelper(str_arr, None, depth+1, max_depth, leaf_width)
+            else: width = leaf_width
+            str_arr[depth] += ''.join([" "] * width)
+            return width
+
+        if depth < max_depth - 1:    
+            width = self._strHelper(str_arr, node.left, depth+1, max_depth, leaf_width)
+            curr_depth = depth + 1
+            while curr_depth < max_depth:
+                str_arr[curr_depth] += " "
+                curr_depth += 1
+            width += 1
+            width += self._strHelper(str_arr, node.right, depth+1, max_depth, leaf_width)
+        else: width = leaf_width
+
+        curr_str = str(node.key)
+
+        while len(curr_str) <= width - 2:
+            curr_str = " " + curr_str + " "
+        if len(curr_str) < width:
+            curr_str += " "
+
+        str_arr[depth] += curr_str
+        return width
+        
+    def __str__(self):
+        """ Returns a string representation of the BST. """
+        str_arr = [""] * (self.height() + 1)
+        self._strHelper(str_arr, self._r, 0, len(str_arr))
+        output = ""
+        for i, s in enumerate(str_arr):
+            if i != 0:
+                output += '\n'
+            output += s
+            
+        return output
+
+    def __checkRep(self):
         """ Recursively checks whether each Node meets the rep invariant (i.e. node.left.key <= node.key <= node.right.key). For debugging. """
         if False: # set to True for debugging
-            self.__checkNodeRep(self.r)
+            self.__checkNodeRep(self._r)
         
     def __checkNodeRep(self, node):
         """ Checks whether each and its children meet the rep invariant. For debugging. """
@@ -221,53 +271,3 @@ class BST(object):
 
         self.__checkNodeRep(node.left)
         self.__checkNodeRep(node.right)
-
-    def __strHelper(self, str_arr, node, depth, max_depth, leaf_width = 4):
-        """ Used recursively to create a properly formatted string with elements in correct columns. """
-        if depth >= max_depth:
-            return 0
-
-        if not node:
-            if depth < max_depth - 1:
-                width = self.__strHelper(str_arr, None, depth+1, max_depth, leaf_width)
-                curr_depth = depth + 1
-                while curr_depth < max_depth:
-                    str_arr[curr_depth] += " "
-                    curr_depth += 1
-                width += 1
-                width += self.__strHelper(str_arr, None, depth+1, max_depth, leaf_width)
-            else: width = leaf_width
-            str_arr[depth] += ''.join([" "] * width)
-            return width
-
-        if depth < max_depth - 1:    
-            width = self.__strHelper(str_arr, node.left, depth+1, max_depth, leaf_width)
-            curr_depth = depth + 1
-            while curr_depth < max_depth:
-                str_arr[curr_depth] += " "
-                curr_depth += 1
-            width += 1
-            width += self.__strHelper(str_arr, node.right, depth+1, max_depth, leaf_width)
-        else: width = leaf_width
-
-        curr_str = str(node.key)
-
-        while len(curr_str) <= width - 2:
-            curr_str = " " + curr_str + " "
-        if len(curr_str) < width:
-            curr_str += " "
-
-        str_arr[depth] += curr_str
-        return width
-        
-    def __str__(self):
-        """ Returns a string representation of the BST. """
-        str_arr = [""] * (self.height() + 1)
-        self.__strHelper(str_arr, self.r, 0, len(str_arr))
-        output = ""
-        for i, s in enumerate(str_arr):
-            if i != 0:
-                output += '\n'
-            output += s
-            
-        return output
