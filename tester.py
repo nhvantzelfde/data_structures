@@ -2,8 +2,11 @@ from heap import Heap, MinHeap, MaxHeap
 from sorted_array import SortedArray
 from hash_table import HashFunction, HashTable
 from BST import BST, Node
+from AVL_tree import AVL
+
 import random
 import datetime
+import math
 
 def heapCompare(heap, ar1):
     """
@@ -269,7 +272,7 @@ def sortedArrayFullTest():
 
     print "\nTesting SortedArray: random operations"
     for i in range(20):
-        if sortedArrayRandomTest(1000): print "Test",i+1,"successful"
+        if sortedArrayRandomTest(500): print "Test",i+1,"successful"
         else: print "Failure at test",i+1
 
 def hashFunctionTest():
@@ -608,12 +611,62 @@ def BSTFullTest():
     print(tree.r)
     print(tree.r.right)
     print(tree.r.right.parent)
+
+def AVLFullTest():
+    for i in range(30):
+        tree = AVL()
+        passed = BSTRandomTest(tree, 1000)
+        
+        if passed:
+            height = tree.height()
+            arr = tree.inorderWalk()
+            max_height = round(1.44 * math.log(len(arr),2) - 1,1)
+            if height > max_height:
+                s = "but height exceeded expectations: "
+            else:
+                s = "and height within expectations: "
+            s += "actual " + str(height) + " vs. expected " + str(max_height)
+            print "Passed test", i+1, s
+    
+    tree = AVL()
+    ar = []
+    for i in range(16):
+        v = random.randint(-99,99)
+        if v not in ar:
+            tree.insert(Node(v))
+            ar.append(v)
+    ar.sort()
+
+    print "Height =", tree.height()
+    print "Max. expected height =", round(1.44 * math.log(len(ar)+1,2) - 1,1)
+    print "Minimum =", tree.minimum()
+    print "Maximum =", tree.maximum()
+    print "In-order Walk =", tree.inorderWalk()
+    print "Array =", ar
+    print "Tree ="
+    print tree
+
+    for i in range(3):
+        index = random.randint(0,len(ar)-1)
+        v = ar[index]
+        tree.delete(tree.search(v))
+        ar.remove(v)
+
+    print "Height =", tree.height()
+    print "Max. expected height =", round(1.44 * math.log(len(ar)+1,2) - 1,1)
+    print "Minimum =", tree.minimum()
+    print "Maximum =", tree.maximum()
+    print "In-order Walk =", tree.inorderWalk()
+    print "Array =", ar
+    print "Tree ="
+    print tree
     
 def main():
     heapFullTest()
     sortedArrayFullTest()
     hashTableFullTest()
     BSTFullTest()
+    AVLFullTest()
 
 if __name__ == "__main__":
     main()

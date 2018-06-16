@@ -1,12 +1,19 @@
-from BST import BST
-from BST import Node
-from BST import randomTest
-# from BST import compare
-import math
-import random
+from BST import BST, Node
 
 class AVL(BST):
+    """ AVL self-balancing tree. Inherits from BST.
+
+    AVL rep. invariant is that, for every node, height of left child and right child differ by no more than 1.
+    Guarantees the height is no more than ~1.44 * lg n, so all major operations function in O(lg n).
+    Augments Nodes to maintain their heights, so that __height and height work in O(1) time.
+    Rotates nodes after insertions and deletions as necessary to maintain the AVL rep. invariant.
+
+    Attributes:
+        none, apart from parent
+    """
+
     def insert(self, new):
+        """ Inserts a given Node into the tree. """
         # insert into BST
         super(AVL, self).insert(new)
         self.__updateHeight(new)
@@ -17,6 +24,7 @@ class AVL(BST):
         self.__checkAVLRep()
     
     def delete(self, node):
+        """ Deletes a given Node from the tree. """
         if not node: return
 
         # insert into BST
@@ -28,6 +36,7 @@ class AVL(BST):
         self.__checkAVLRep()
 
     def __fixAVL(self, node):
+        """ Fixes the AVL property of the tree, updating node heights and making rotations as necessary. """
         while node:
             if abs(self.__height(node.left) - self.__height(node.right)) <= 1:
                 # AVL property is met; no rotates needed
@@ -50,6 +59,7 @@ class AVL(BST):
             node = node.parent
         
     def __rotateLeft(self, node):
+        """ Rotates the given node to the left, fixing subtrees as required. """
         # new parent of node
         new_p = node.right
 
@@ -77,6 +87,7 @@ class AVL(BST):
         self.__updateHeight(new_p)
 
     def __rotateRight(self, node):
+        """ Rotates the given node to the right, fixing subtrees as required. """
         # new parent of node
         new_p = node.left
 
@@ -102,23 +113,31 @@ class AVL(BST):
         # update heights
         self.__updateHeight(node)
         self.__updateHeight(new_p)
- 
+
+    def height(self):
+        """ Returns the height of the tree. Note that the height of a leaf is 0. This takes O(1) time. """
+        return self.__height(self.r)
+        
     def __height(self, node):
+        """ Returns the height of a given Node. Note that the height of a leaf is 0. """
         if not node:
             return -1
         else:
             return node.height
         
     def __updateHeight(self, node):
+        """ Updates the height of a given Node, using children's heights. """
         if not node: return
         else:
             node.height = 1 + max(self.__height(node.left), self.__height(node.right))
 
     def __checkAVLRep(self):
+        """ Recursively checks whether each node meets the AVL rep. invariant (|left.height - right-height| <= 1). """
         if False: # set to True for debugging
             self.__checkHeightRep(self.r)
         
     def __checkHeightRep(self, node):
+        """ Checks whether a Node and its children meet the AVL rep. invariant. For debugging purposes. """
         if not node: return
 
         if self.__height(node) != 1 + max(self.__height(node.left), self.__height(node.right)):
@@ -129,57 +148,3 @@ class AVL(BST):
 
         self.__checkHeightRep(node.left)
         self.__checkHeightRep(node.right)
-
-def main():
-    for i in range(30):
-        tree = AVL()
-        passed = randomTest(tree, 1000)
-        
-        if passed:
-            height = tree.height()
-            arr = tree.inorderWalk()
-            max_height = 1.44 * math.log(len(arr),2) - 1
-            if height > max_height:
-                s = "but height exceeded expectations: "
-            else:
-                s = "and height within expectations: "
-            s += "actual " + str(height) + " vs. expected " + str(max_height)
-            print "Passed test", i+1, s
-    
-    tree = AVL()
-    ar = []
-    for i in range(16):
-        v = random.randint(-99,99)
-        if v not in ar:
-            tree.insert(Node(v))
-            ar.append(v)
-    ar.sort()
-
-    print "Height =", tree.height()
-    print "Max. expected height =", 1.44 * math.log(len(ar)+1,2) - 1
-    print "Minimum =", tree.minimum()
-    print "Maximum =", tree.maximum()
-    print "In-order Walk =", tree.inorderWalk()
-    print "Array =", ar
-    print "Tree ="
-    print tree
-
-    for i in range(3):
-        index = random.randint(0,len(ar)-1)
-        v = ar[index]
-        tree.delete(tree.search(v))
-        ar.remove(v)
-
-    print "Height =", tree.height()
-    print "Max. expected height =", 1.44 * math.log(len(ar)+1,2) - 1
-    print "Minimum =", tree.minimum()
-    print "Maximum =", tree.maximum()
-    print "In-order Walk =", tree.inorderWalk()
-    print "Array =", ar
-    print "Tree ="
-    print tree
-
-  
-
-if __name__ == "__main__":
-    main()
